@@ -1,0 +1,10 @@
+# 列出需要忽略的文件
+__pycache__/
+*.pyc
+forum.db
+*.db
+.env
+.venv/
+venv/
+.idea/
+.vscode/
