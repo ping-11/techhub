@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}账号设置{% endblock %}
+{% block content %}
+<div class="form-page">
+  <div class="form-card">
+    <h2>⚙️ 账号设置</h2>
+    <form method="post" action="/settings">
+      <div class="form-group">
+        <label>头像（选一个 Emoji）</label>
+        <div class="emoji-picker">
+          {% for emoji in ['🤖','👨‍💻','👩‍💻','🦊','🐧','🐉','🦁','🐯','🦋','⚡','🌟','🔥','💎','🎯','🚀','🛸','🎮','🎸','🏆','🌈'] %}
+          <span class="emoji-opt {% if user.avatar == emoji %}selected{% endif %}"
+                onclick="selectEmoji('{{ emoji }}')">{{ emoji }}</span>
+          {% endfor %}
+        </div>
+        <input type="hidden" name="avatar" id="avatarInput" value="{{ user.avatar }}">
+      </div>
+      <div class="form-group">
+        <label>个人简介（最多200字）</label>
+        <textarea name="bio" class="form-input" rows="4" maxlength="200"
+                  placeholder="介绍一下自己...">{{ user.bio }}</textarea>
+      </div>
+      <hr style="margin:1.5rem 0;opacity:0.2">
+      <h3 style="margin-bottom:1rem">🔐 修改密码（不改可留空）</h3>
+      <div class="form-group">
+        <label>当前密码</label>
+        <input type="password" name="old_password" class="form-input" placeholder="输入当前密码...">
+      </div>
+      <div class="form-group">
+        <label>新密码</label>
+        <input type="password" name="new_password" class="form-input" placeholder="至少6位...">
+      </div>
+      <div class="form-actions">
+        <a href="/user/{{ user.username }}" class="btn btn-ghost">取消</a>
+        <button type="submit" class="btn btn-primary">保存设置</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+function selectEmoji(e) {
+  document.querySelectorAll('.emoji-opt').forEach(el => el.classList.remove('selected'));
+  event.target.classList.add('selected');
+  document.getElementById('avatarInput').value = e;
+}
+</script>
+{% endblock %}
