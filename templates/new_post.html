@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}发新帖{% endblock %}
+{% block content %}
+<div class="form-page">
+  <div class="form-card">
+    <h2>✏️ 发表新帖</h2>
+    <form method="post" action="/new-post">
+      <div class="form-group">
+        <label>版块分类</label>
+        <select name="category" class="form-input" required>
+          <option value="">请选择版块...</option>
+          {% for cat in categories %}
+          <option value="{{ cat.id }}">{{ cat.icon }} {{ cat.name }} — {{ cat.desc }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>帖子标题</label>
+        <input type="text" name="title" class="form-input"
+               placeholder="简洁明了的标题，吸引更多人点击..." maxlength="100" required>
+      </div>
+      <div class="form-group">
+        <label>帖子内容</label>
+        <textarea name="content" class="form-input" rows="14"
+                  placeholder="详细描述你的问题、经验或想法...
+
+技巧提示：
+• 代码请用缩进表示
+• 可以附上参考链接
+• 越详细越容易获得有价值的回复" required></textarea>
+      </div>
+      <div class="form-actions">
+        <a href="/" class="btn btn-ghost">取消</a>
+        <button type="submit" class="btn btn-primary">🚀 发布帖子</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
