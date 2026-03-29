@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+<div class="page-wrapper">
+  <div class="posts-section">
+    <!-- 帖子正文 -->
+    <article class="post-card">
+      <div class="post-card-header">
+        <div class="post-card-meta">
+          <span class="badge badge-cat">{{ post.cat_name }}</span>
+          {% if post.pinned %}<span class="badge badge-pin">📌置顶</span>{% endif %}
+          {% if post.locked %}<span class="badge badge-lock">🔒已锁定</span>{% endif %}
+        </div>
+        <h1 class="post-card-title">{{ post.title }}</h1>
+        <div class="post-card-author">
+          <a href="/user/{{ post.username }}" class="author-info">
+            <span class="author-avatar">{{ post.avatar }}</span>
+            <div>
+              <strong>{{ post.username }}</strong>
+              <div style="font-size:0.8rem;opacity:0.6;">{{ post.bio or '这个人很懒，什么都没留下' }}</div>
+            </div>
+          </a>
+          <div class="post-card-stats">
+            <span>📅 {{ post.created_at[:16] }}</span>
+            <span>👁 {{ post.views }} 次浏览</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-card-body">{{ post.content }}</div>
+      <div class="post-card-footer">
+        <button class="btn {% if liked %}btn-like-active{% else %}btn-ghost{% endif %} like-btn"
+                id="likeBtn" data-pid="{{ post.id }}" {% if not current_user %}disabled{% endif %}>
+          ❤️ <span id="likeCnt">{{ like_count }}</span> 喜欢
+        </button>
+        {% if current_user and current_user.id == post.user_id %}
+        <span style="opacity:0.5;font-size:0.85rem;">这是您的帖子</span>
+        {% endif %}
+      </div>
+    </article>
+
+    <!-- 回复列表 -->
+    <div class="replies-section" id="replies">
+      <h3>💬 {{ replies|length }} 条回复</h3>
+      {% if replies %}
+        {% for r in replies %}
+        <div class="reply-item">
+          <a href="/user/{{ r.username }}" class="reply-avatar">{{ r.avatar }}</a>
+          <div class="reply-body">
+            <div class="reply-header">
+              <a href="/user/{{ r.username }}"><strong>{{ r.username }}</strong></a>
+              <span class="reply-time">{{ r.created_at[:16] }}</span>
+            </div>
+            <div class="reply-content">{{ r.content }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state" style="padding:2rem">
+          <p>还没有回复，来第一个说说你的想法！</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- 回复框 -->
+    {% if current_user %}
+      {% if post.locked %}
+      <div class="alert alert-warning">🔒 帖子已锁定，禁止回复</div>
+      {% else %}
+      <div class="reply-form-card">
+        <h3>✍️ 发表回复</h3>
+        <form method="post" action="/reply/{{ post.id }}">
+          <textarea name="content" class="reply-textarea" rows="5"
+                    placeholder="分享你的想法、经验或见解...（支持纯文本）" required></textarea>
+          <div style="text-align:right;margin-top:8px">
+            <button type="submit" class="btn btn-primary">发送回复 →</button>
+          </div>
+        </form>
+      </div>
+      {% endif %}
+    {% else %}
+    <div class="reply-form-card" style="text-align:center;padding:2rem">
+      <p>登录后才能参与讨论</p>
+      <a href="/login?next=/post/{{ post.id }}" class="btn btn-primary">立即登录</a>
+      <a href="/register" class="btn btn-ghost" style="margin-left:8px">注册账号</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- 侧边栏 -->
+  <aside class="sidebar">
+    <div class="sidebar-card">
+      <h3>👤 楼主信息</h3>
+      <div style="text-align:center;padding:1rem 0">
+        <div style="font-size:3rem">{{ post.avatar }}</div>
+        <a href="/user/{{ post.username }}"><strong>{{ post.username }}</strong></a>
+        <p style="font-size:0.8rem;opacity:0.6;margin-top:4px">{{ post.bio or '暂无简介' }}</p>
+      </div>
+    </div>
+    <div class="sidebar-card">
+      <h3>🔗 快速导航</h3>
+      <a href="/" class="btn btn-ghost" style="width:100%;margin-bottom:8px">← 返回首页</a>
+      {% if current_user %}
+      <a href="/new-post" class="btn btn-primary" style="width:100%">✏️ 发新帖</a>
+      {% endif %}
+    </div>
+  </aside>
+</div>
+
+<script>
+document.getElementById('likeBtn')?.addEventListener('click', async function() {
+  const pid = this.dataset.pid;
+  const res = await fetch(`/like/${pid}`, {method:'POST'});
+  const data = await res.json();
+  document.getElementById('likeCnt').textContent = data.count;
+  this.classList.toggle('btn-like-active', data.liked);
+  this.classList.toggle('btn-ghost', !data.liked);
+});
+</script>
+{% endblock %}
