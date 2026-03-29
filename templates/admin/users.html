@@ -1,0 +1,44 @@
+{% extends 'admin/dashboard.html' %}
+{% block admin_content %}
+<div class="admin-section-header" style="margin-bottom:1.5rem">
+  <h2>👥 用户管理</h2>
+  <form method="get" style="display:flex;gap:8px">
+    <input type="text" name="q" class="form-input" placeholder="搜索用户名或邮箱..." value="{{ search }}" style="width:250px">
+    <button class="btn btn-primary btn-sm" type="submit">搜索</button>
+    {% if search %}<a href="/admin/users" class="btn btn-ghost btn-sm">清除</a>{% endif %}
+  </form>
+</div>
+<table class="admin-table">
+  <thead>
+    <tr>
+      <th>ID</th><th>头像</th><th>用户名</th><th>邮箱</th>
+      <th>角色</th><th>状态</th><th>注册时间</th><th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for u in users %}
+  <tr {% if u.banned %}class="row-banned"{% endif %}>
+    <td>{{ u.id }}</td>
+    <td>{{ u.avatar }}</td>
+    <td><a href="/user/{{ u.username }}">{{ u.username }}</a></td>
+    <td>{{ u.email }}</td>
+    <td>{% if u.role=='admin' %}<span class="badge badge-admin">👑 管理员</span>{% else %}普通用户{% endif %}</td>
+    <td>{% if u.banned %}<span class="badge badge-danger">🚫 封禁</span>{% else %}<span class="badge badge-ok">✅ 正常</span>{% endif %}</td>
+    <td>{{ u.created_at[:16] }}</td>
+    <td>
+      {% if u.role != 'admin' %}
+      <form method="post" action="/admin/user/{{ u.id }}/ban" style="display:inline">
+        <button class="btn {% if u.banned %}btn-ok{% else %}btn-danger{% endif %} btn-xs"
+                onclick="return confirm('确认{% if u.banned %}解封{% else %}封禁{% endif %} {{ u.username }}？')">
+          {% if u.banned %}解封{% else %}封禁{% endif %}
+        </button>
+      </form>
+      {% else %}
+      <span style="opacity:0.4;font-size:0.8rem">无法操作</span>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
