@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}{{ profile_user.username }} 的主页{% endblock %}
+{% block content %}
+<div class="page-wrapper">
+  <div class="posts-section">
+    <!-- 用户发帖记录 -->
+    <div class="section-header">
+      <h3>📝 发帖记录（共 {{ posts|length }} 条）</h3>
+    </div>
+    {% if posts %}
+    <div class="post-list">
+      {% for p in posts %}
+      <div class="post-item">
+        <div class="post-body">
+          <div class="post-title-row">
+            <span class="badge badge-cat">{{ p.cat_icon }} {{ p.cat_name }}</span>
+            <a href="/post/{{ p.id }}" class="post-title">{{ p.title }}</a>
+          </div>
+          <div class="post-info">
+            <span>{{ p.created_at[:16] }}</span>
+            <span class="dot">·</span>
+            <span>💬 {{ p.reply_count }} 回复</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div style="font-size:3rem">📭</div>
+      <p>还没有发过帖子</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- 侧边栏：用户信息 -->
+  <aside class="sidebar">
+    <div class="sidebar-card profile-card">
+      <div class="profile-avatar">{{ profile_user.avatar }}</div>
+      <h2 class="profile-name">{{ profile_user.username }}</h2>
+      {% if profile_user.role == 'admin' %}
+      <span class="badge badge-admin">👑 管理员</span>
+      {% endif %}
+      <p class="profile-bio">{{ profile_user.bio or '这个人很懒，什么都没留下...' }}</p>
+      <div class="profile-stats">
+        <div class="pstat">
+          <strong>{{ posts|length }}</strong>
+          <span>帖子</span>
+        </div>
+        <div class="pstat">
+          <strong>{{ reply_count }}</strong>
+          <span>回复</span>
+        </div>
+      </div>
+      <div class="profile-joined">📅 注册于 {{ profile_user.created_at[:10] }}</div>
+    </div>
+
+    {% if current_user and current_user.username == profile_user.username %}
+    <div class="sidebar-card">
+      <a href="/settings" class="btn btn-primary" style="width:100%">⚙️ 编辑资料</a>
+    </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}
