@@ -1,0 +1,44 @@
+{% extends 'admin/dashboard.html' %}
+{% block admin_content %}
+<h2>📝 帖子管理（共 {{ posts|length }} 篇）</h2>
+<table class="admin-table">
+  <thead>
+    <tr>
+      <th>ID</th><th>标题</th><th>作者</th><th>版块</th>
+      <th>状态</th><th>发帖时间</th><th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for p in posts %}
+  <tr>
+    <td>{{ p.id }}</td>
+    <td><a href="/post/{{ p.id }}">{{ p.title[:35] }}{% if p.title|length > 35 %}...{% endif %}</a></td>
+    <td>{{ p.username }}</td>
+    <td>{{ p.cat_name }}</td>
+    <td>
+      {% if p.pinned %}<span class="badge badge-pin">📌置顶</span>{% endif %}
+      {% if p.locked %}<span class="badge badge-lock">🔒锁定</span>{% endif %}
+      {% if not p.pinned and not p.locked %}<span style="opacity:0.5">正常</span>{% endif %}
+    </td>
+    <td>{{ p.created_at[:16] }}</td>
+    <td class="action-cell">
+      <form method="post" action="/admin/post/{{ p.id }}/pin" style="display:inline">
+        <button class="btn btn-ghost btn-xs" title="切换置顶">
+          {% if p.pinned %}取消置顶{% else %}📌置顶{% endif %}
+        </button>
+      </form>
+      <form method="post" action="/admin/post/{{ p.id }}/lock" style="display:inline">
+        <button class="btn btn-ghost btn-xs" title="切换锁定">
+          {% if p.locked %}🔓解锁{% else %}🔒锁定{% endif %}
+        </button>
+      </form>
+      <form method="post" action="/admin/post/{{ p.id }}/delete" style="display:inline"
+            onsubmit="return confirm('删除帖子 #{{ p.id }} 及其所有回复？此操作不可撤销！')">
+        <button class="btn btn-danger btn-xs">删除</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
