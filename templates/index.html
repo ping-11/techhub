@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}首页{% endblock %}
+{% block content %}
+<div class="page-wrapper">
+  <!-- 左侧：帖子列表 -->
+  <section class="posts-section">
+    <!-- 搜索栏 -->
+    <div class="search-bar">
+      <form method="get" action="/">
+        {% if cat_id %}<input type="hidden" name="cat" value="{{ cat_id }}">{% endif %}
+        <input class="search-input" type="text" name="q" placeholder="🔍 搜索帖子标题或内容..." value="{{ search }}">
+        <button class="btn btn-primary" type="submit">搜索</button>
+        {% if search or cat_id %}<a href="/" class="btn btn-ghost">清除</a>{% endif %}
+      </form>
+    </div>
+
+    <!-- 分类标签 -->
+    <div class="cat-tags">
+      <a href="/" class="cat-tag {% if not cat_id %}active{% endif %}">全部</a>
+      {% for cat in categories %}
+      <a href="/?cat={{ cat.id }}" class="cat-tag {% if cat_id == cat.id %}active{% endif %}">
+        {{ cat.icon }} {{ cat.name }}
+      </a>
+      {% endfor %}
+    </div>
+
+    <!-- 帖子列表 -->
+    {% if posts %}
+    <div class="post-list">
+      {% for p in posts %}
+      <div class="post-item {% if p.pinned %}pinned{% endif %}">
+        <div class="post-meta-left">
+          <a href="/user/{{ p.username }}" class="post-avatar">{{ p.avatar }}</a>
+        </div>
+        <div class="post-body">
+          <div class="post-title-row">
+            {% if p.pinned %}<span class="badge badge-pin">📌置顶</span>{% endif %}
+            {% if p.locked %}<span class="badge badge-lock">🔒</span>{% endif %}
+            <span class="badge badge-cat">{{ p.cat_icon }} {{ p.cat_name }}</span>
+            <a href="/post/{{ p.id }}" class="post-title">{{ p.title }}</a>
+          </div>
+          <div class="post-info">
+            <a href="/user/{{ p.username }}">{{ p.username }}</a>
+            <span class="dot">·</span>
+            <span>{{ p.created_at[:16] }}</span>
+            <span class="dot">·</span>
+            <span>👁 {{ p.views }}</span>
+            <span class="dot">·</span>
+            <span>💬 {{ p.reply_count }}</span>
+            <span class="dot">·</span>
+            <span>❤️ {{ p.like_count }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- 分页 -->
+    {% if total_pages > 1 %}
+    <div class="pagination">
+      {% if page > 1 %}
+        <a href="?page={{ page-1 }}{% if cat_id %}&cat={{ cat_id }}{% endif %}{% if search %}&q={{ search }}{% endif %}" class="page-btn">‹ 上一页</a>
+      {% endif %}
+      {% for i in range(1, total_pages+1) %}
+        {% if i == page %}
+          <span class="page-btn active">{{ i }}</span>
+        {% elif i <= 3 or i >= total_pages-2 or (i >= page-2 and i <= page+2) %}
+          <a href="?page={{ i }}{% if cat_id %}&cat={{ cat_id }}{% endif %}{% if search %}&q={{ search }}{% endif %}" class="page-btn">{{ i }}</a>
+        {% elif i == 4 or i == total_pages-3 %}
+          <span class="page-ellipsis">…</span>
+        {% endif %}
+      {% endfor %}
+      {% if page < total_pages %}
+        <a href="?page={{ page+1 }}{% if cat_id %}&cat={{ cat_id }}{% endif %}{% if search %}&q={{ search }}{% endif %}" class="page-btn">下一页 ›</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+      <div style="font-size:4rem;">🤷</div>
+      <p>暂无帖子{% if search %}（搜索 "{{ search }}"）{% endif %}</p>
+      {% if current_user %}<a href="/new-post" class="btn btn-primary">发第一帖</a>{% endif %}
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- 右侧：侧边栏 -->
+  <aside class="sidebar">
+    <div class="sidebar-card">
+      <h3>📊 论坛统计</h3>
+      <div class="stat-row"><span>👥 注册用户</span><strong>{{ stats.user_count }}</strong></div>
+      <div class="stat-row"><span>📝 帖子总数</span><strong>{{ stats.post_count }}</strong></div>
+      <div class="stat-row"><span>💬 回复总数</span><strong>{{ stats.reply_count }}</strong></div>
+    </div>
+
+    <div class="sidebar-card">
+      <h3>🔥 热门帖子</h3>
+      {% for p in hot_posts %}
+      <div class="hot-item">
+        <a href="/post/{{ p.id }}">{{ p.title[:20] }}{% if p.title|length > 20 %}...{% endif %}</a>
+        <span class="hot-meta">👁{{ p.views }} 💬{{ p.rc }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="sidebar-card">
+      <h3>📂 版块导航</h3>
+      {% for cat in categories %}
+      <a href="/?cat={{ cat.id }}" class="cat-nav-item">
+        <span>{{ cat.icon }} {{ cat.name }}</span>
+        <span style="font-size:0.75rem;opacity:0.6;">{{ cat.desc[:15] }}...</span>
+      </a>
+      {% endfor %}
+    </div>
+
+    {% if not current_user %}
+    <div class="sidebar-card join-card">
+      <h3>🚀 加入 TechHub</h3>
+      <p>与数千名技术爱好者一起探讨技术，分享经验！</p>
+      <a href="/register" class="btn btn-primary" style="width:100%">立即注册</a>
+      <a href="/login" class="btn btn-ghost" style="width:100%;margin-top:8px">已有账号？登录</a>
+    </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}
