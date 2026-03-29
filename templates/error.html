@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}错误 {{ code }}{% endblock %}
+{% block content %}
+<div class="error-page">
+  <div style="font-size:6rem">{% if code==404 %}🔍{% else %}🚫{% endif %}</div>
+  <h1>{{ code }}</h1>
+  <p>{{ msg }}</p>
+  <a href="/" class="btn btn-primary" style="margin-top:1rem">← 回到首页</a>
+</div>
+{% endblock %}
